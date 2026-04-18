@@ -100,7 +100,7 @@ router.post("/soft", requireAuth, async (req: AuthedRequest, res) => {
         WHERE model = ${parsed.data.model}
           AND suffix = ${parsed.data.suffix}
           AND colour = ${parsed.data.colour}
-          AND status = ${VehicleStatus.OPEN}
+          AND status = ${VehicleStatus.OPEN}::"VehicleStatus"
         ORDER BY "dateOfArrival" ASC
         LIMIT 1
       `;
