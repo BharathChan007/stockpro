@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { api, getToken } from "../../api.js";
+import { api, getToken, API_BASE_URL } from "../../api.js";
 
 type VehicleRow = {
   id: string;
@@ -89,7 +89,7 @@ export default function StockAdminPage() {
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-surface-container-high font-headline text-xs uppercase tracking-widest text-on-surface ring-1 ring-outline-variant/15"
           onClick={async () => {
             const token = getToken();
-            const res = await fetch("/stock/export", {
+            const res = await fetch(`${API_BASE_URL}/stock/export`, {
               headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
             if (!res.ok) return;

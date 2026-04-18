@@ -9,6 +9,8 @@ export function setToken(token: string | null) {
   else localStorage.removeItem(TOKEN_KEY);
 }
 
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 export async function api<T>(
   path: string,
   opts: RequestInit & { auth?: boolean } = {}
@@ -22,7 +24,8 @@ export async function api<T>(
     const t = getToken();
     if (t) headers.set("Authorization", `Bearer ${t}`);
   }
-  const res = await fetch(path, { ...opts, headers });
+  const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
+  const res = await fetch(url, { ...opts, headers });
   if (!res.ok) {
     let msg = res.statusText;
     try {
