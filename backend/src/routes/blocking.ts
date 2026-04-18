@@ -96,12 +96,12 @@ router.post("/soft", requireAuth, async (req: AuthedRequest, res) => {
       }
 
       const candidates = await tx.$queryRaw<{ id: string }[]>`
-        SELECT id FROM Vehicle
+        SELECT id FROM "Vehicle"
         WHERE model = ${parsed.data.model}
           AND suffix = ${parsed.data.suffix}
           AND colour = ${parsed.data.colour}
           AND status = ${VehicleStatus.OPEN}
-        ORDER BY dateOfArrival ASC
+        ORDER BY "dateOfArrival" ASC
         LIMIT 1
       `;
       if (!candidates.length) return { kind: "NO_STOCK" as const };
