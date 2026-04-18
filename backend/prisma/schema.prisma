@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SALES_MANAGER
+}
+
+enum VehicleStatus {
+  OPEN
+  SOFT_BLOCKED
+  HARD_BLOCKED
+  DELIVERED
+}
+
+enum BlockType {
+  SOFT
+  HARD
+}
+
+enum PaymentMode {
+  CASH
+  FINANCE
+}
+
+enum BlockingRecordStatus {
+  ACTIVE
+  EXPIRED
+  DELIVERED
+}
+
+model Branch {
+  id       String @id @default(uuid())
+  name     String
+  location String @default("")
+  users    User[]
+  blocks   BlockingRequest[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  loginId      String    @unique
+  passwordHash String
+  role         UserRole
+  branchId     String?
+  branch       Branch?   @relation(fields: [branchId], references: [id])
+  fullName     String
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  blocksCreated BlockingRequest[] @relation("BlockingOwner")
+  audits        AuditLog[]
+}
+
+model Vehicle {
+  id                String         @id @default(uuid())
+  chassisNumber     String         @unique
+  chassisYear       Int
+  model             String
+  suffix            String
+  colour            String
+  stockyardLocation String         @default("")
+  dateOfArrival     DateTime
+  status            VehicleStatus  @default(OPEN)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  blockings BlockingRequest[]
+}
+
+model BlockingRequest {
+  id                 String                 @id @default(uuid())
+  vehicleId          String
+  vehicle            Vehicle                @relation(fields: [vehicleId], references: [id])
+  userId             String
+  user               User                   @relation("BlockingOwner", fields: [userId], references: [id])
+  branchId           String
+  branch             Branch                 @relation(fields: [branchId], references: [id])
+  blockType          BlockType
+  orderId            String                 @default("")
+  customerName       String                 @default("")
+  consultantName     String                 @default("")
+  paymentMode        PaymentMode?
+  financierBank      String?
+  paymentStatus      String                 @default("")
+  expectedBillingDate DateTime?
+  receiptUrl         String?
+
+  softBlockAt        DateTime?
+  hardBlockAt        DateTime?
+  expiryAt           DateTime?
+
+  status             BlockingRecordStatus    @default(ACTIVE)
+  retailId           String?
+  deliveryDocUrl     String?
+  deliveredAt        DateTime?
+
+  extendedByAdmin    Boolean                @default(false)
+  adminNotes         String?
+
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([userId])
+  @@index([branchId])
+  @@index([vehicleId])
+  @@index([expiryAt])
+  @@index([status])
+}
+
+model ModelConfig {
+  id                     String   @id @default(uuid())
+  modelName              String   @unique
+  blockingDurationDays   Int
+  updatedById            String?
+  updatedAt              DateTime @updatedAt
+}
+
+model GlobalConfig {
+  id                    Int @id @default(1)
+  defaultBlockingDays   Int @default(7)
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  entityType    String
+  entityId      String
+  action        String
+  performedById String
+  performedBy   User     @relation(fields: [performedById], references: [id])
+  previousValue String   @default("{}")
+  newValue      String   @default("{}")
+  performedAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+}

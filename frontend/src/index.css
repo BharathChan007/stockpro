@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #131314;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2a2a2b;
+  border-radius: 10px;
+}
+
+.glass-overlay {
+  background: rgba(53, 52, 54, 0.6);
+  backdrop-filter: blur(20px);
+}
+
+.timer-glow {
+  text-shadow: 0 0 8px #d71a18;
+}
