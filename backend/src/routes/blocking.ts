@@ -303,10 +303,10 @@ router.get("/my", requireAuth, async (req: AuthedRequest, res) => {
   const where = {
     userId: req.auth!.sub,
     ...(t === "active"
-      ? { status: BlockingRecordStatus.ACTIVE as const }
+      ? { status: BlockingRecordStatus.ACTIVE }
       : t === "expired"
-        ? { status: BlockingRecordStatus.EXPIRED as const }
-        : { status: BlockingRecordStatus.DELIVERED as const }),
+        ? { status: BlockingRecordStatus.EXPIRED }
+        : { status: BlockingRecordStatus.DELIVERED }),
   };
 
   const rows = await prisma.blockingRequest.findMany({
