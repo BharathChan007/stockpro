@@ -23,7 +23,8 @@ const globalSchema = z.object({ defaultBlockingDays: z.number().int().min(1).max
 router.put("/global", async (req: AuthedRequest, res) => {
   const parsed = globalSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const prev = await prisma.globalConfig.findUnique({ where: { id: 1 } });
@@ -54,7 +55,8 @@ router.put("/models/:model", async (req: AuthedRequest, res) => {
   const modelName = decodeURIComponent(req.params.model);
   const parsed = modelSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const prev = await prisma.modelConfig.findUnique({ where: { modelName } });

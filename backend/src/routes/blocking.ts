@@ -63,7 +63,8 @@ router.post("/soft", requireAuth, async (req: AuthedRequest, res) => {
   }
   const parsed = softSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const branchId = req.auth!.branchId;
@@ -184,7 +185,8 @@ router.post(
     }
     const parsed = hardFields.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid payload." });
+      const issue = parsed.error.issues[0];
+      res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
       return;
     }
     if (parsed.data.paymentMode === PaymentMode.FINANCE && !parsed.data.financierBank?.trim()) {
@@ -194,8 +196,8 @@ router.post(
 
     const blockingId = parsed.data.blockingId;
     const billing = new Date(parsed.data.expectedBillingDate);
-    if (Number.isNaN(billing.getTime())) {
-      res.status(400).json({ error: "Invalid expected billing date." });
+    if (Number.isNaN(billing.getTime()) || billing.getFullYear() > 2100 || billing.getFullYear() < 2000) {
+      res.status(400).json({ error: "Invalid expected billing date (must be between 2000-2100)." });
       return;
     }
 
@@ -410,7 +412,8 @@ router.patch("/:id", requireAuth, async (req: AuthedRequest, res) => {
   const id = req.params.id;
   const parsed = patchSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const prev = await prisma.blockingRequest.findUnique({ where: { id }, include: { vehicle: true } });
@@ -465,7 +468,8 @@ router.patch("/:id/extend", requireAuth, async (req: AuthedRequest, res) => {
   const id = req.params.id;
   const parsed = extendSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const expiryAt = new Date(parsed.data.expiryAt);

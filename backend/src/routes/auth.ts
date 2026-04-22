@@ -16,7 +16,8 @@ const loginSchema = z.object({
 router.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const { loginId, password } = parsed.data;

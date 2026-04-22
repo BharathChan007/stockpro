@@ -21,7 +21,8 @@ const createSchema = z.object({
 router.post("/", async (req, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid payload." });
+    const issue = parsed.error.issues[0];
+    res.status(400).json({ error: `${issue.path.join(".")}: ${issue.message}` });
     return;
   }
   const b = await prisma.branch.create({
